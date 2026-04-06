@@ -261,17 +261,13 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
               fontFamily: 'Inter, system-ui, sans-serif',
               padding: '8px 14px',
               cursor: status === 'generating' ? 'not-allowed' : 'pointer',
-              transition: 'border-color 0.12s, color 0.12s, background 0.12s',
+              transition: 'background 0.12s ease',
             }}
             onMouseEnter={(e) => {
               if (status === 'generating') return
-              e.currentTarget.style.borderColor = '#444'
-              e.currentTarget.style.color = '#fff'
-              e.currentTarget.style.background = '#111'
+              e.currentTarget.style.background = '#2a2a2a'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#2a2a2a'
-              e.currentTarget.style.color = '#999'
               e.currentTarget.style.background = 'none'
             }}
           >
