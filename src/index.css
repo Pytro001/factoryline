@@ -108,6 +108,12 @@
   opacity: 1;
 }
 
+/* Annual output: same gray as label for placeholder */
+.annual-output-input::placeholder {
+  color: #999;
+  opacity: 0.55;
+}
+
 /* ── Utility ───────────────────────────────────────────────────────────────── */
 .line-clamp-2 {
   display: -webkit-box;

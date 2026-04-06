@@ -19,6 +19,16 @@ interface PromptPageProps {
 
 type Status = 'idle' | 'generating' | 'error'
 
+const ANNUAL_OUTPUT_LABEL_COLOR = '#999'
+
+function formatAnnualOutputInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  if (digits === '') return ''
+  const n = parseInt(digits, 10)
+  if (!Number.isFinite(n) || n === 0) return digits === '' ? '' : '0'
+  return n.toLocaleString('en-US')
+}
+
 export default function PromptPage({ onGenerated }: PromptPageProps) {
   const [prompt, setPrompt] = useState('')
   const [status, setStatus] = useState<Status>('idle')
@@ -152,14 +162,23 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
               gap: 12,
             }}
           >
-            <label style={{ fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: '0.07em', flexShrink: 0 }}>
+            <label
+              style={{
+                fontSize: 11,
+                color: ANNUAL_OUTPUT_LABEL_COLOR,
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                flexShrink: 0,
+              }}
+            >
               Annual output
             </label>
             <input
               type="text"
               inputMode="numeric"
+              className="annual-output-input"
               value={annualVolume}
-              onChange={(e) => setAnnualVolume(e.target.value)}
+              onChange={(e) => setAnnualVolume(formatAnnualOutputInput(e.target.value))}
               disabled={status === 'generating'}
               placeholder="100,000"
               style={{
@@ -168,7 +187,7 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
                 background: '#0a0a0a',
                 border: '1px solid #222',
                 borderRadius: 4,
-                color: '#fff',
+                color: ANNUAL_OUTPUT_LABEL_COLOR,
                 fontSize: 13,
                 padding: '7px 10px',
                 outline: 'none',
