@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   PackageCheck,
   DoorOpen,
+  StickyNote,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -27,6 +28,7 @@ export type MachineTypeId =
   | 'quality'
   | 'packaging'
   | 'exit'
+  | 'note'
 
 export type MachineCategory =
   | 'transport'
@@ -34,6 +36,7 @@ export type MachineCategory =
   | 'assembly'
   | 'control'
   | 'logistics'
+  | 'annotation'
 
 export interface MachineTypeConfig {
   id: MachineTypeId
@@ -167,6 +170,16 @@ export const MACHINE_TYPES: Record<MachineTypeId, MachineTypeConfig> = {
     defaultHeight: 70,
     description: 'Emergency exit and safety point',
   },
+  note: {
+    id: 'note',
+    name: 'Note',
+    icon: StickyNote,
+    color: '#facc15',
+    category: 'annotation',
+    defaultWidth: 200,
+    defaultHeight: 100,
+    description: 'Free-form note or annotation on the canvas',
+  },
 }
 
 export const MACHINE_CATEGORIES: Record<MachineCategory, { name: string; color: string }> = {
@@ -175,6 +188,7 @@ export const MACHINE_CATEGORIES: Record<MachineCategory, { name: string; color: 
   assembly:   { name: 'Assembly',         color: '#22C55E' },
   control:    { name: 'Quality & Control',color: '#14B8A6' },
   logistics:  { name: 'Logistics',        color: '#F59E0B' },
+  annotation: { name: 'Annotation',       color: '#facc15' },
 }
 
 export function getMachineType(id: string): MachineTypeConfig {

@@ -29,6 +29,7 @@ const ACCENT: Record<string, string> = {
   quality:    '#2DD4BF',
   packaging:  '#818CF8',
   exit:       '#F87171',
+  note:       '#facc15',
 }
 
 const HANDLE_STYLE = {
@@ -79,6 +80,8 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
     <>
       <NodeToolbar isVisible={selected} position={Position.Top} offset={6}>
         <div
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -88,10 +91,12 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
             borderRadius: 5,
             padding: '3px 4px',
             fontFamily: 'Inter, system-ui, sans-serif',
+            pointerEvents: 'all',
           }}
         >
           <button
-            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setEditing(true) }}
+            onClick={(e) => { e.stopPropagation(); setEditing(true) }}
+            onMouseDown={(e) => e.stopPropagation()}
             style={{
               display: 'flex', alignItems: 'center', gap: 4,
               padding: '3px 8px', fontSize: 11, color: '#aaa',
@@ -105,7 +110,8 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
           </button>
           <span style={{ width: 1, height: 12, background: '#2a2a2a' }} />
           <button
-            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); deleteNode(id) }}
+            onClick={(e) => { e.stopPropagation(); deleteNode(id) }}
+            onMouseDown={(e) => e.stopPropagation()}
             style={{
               display: 'flex', alignItems: 'center', gap: 4,
               padding: '3px 8px', fontSize: 11, color: '#888',
@@ -214,7 +220,7 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
         {/* Cycle + first spec from notes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minHeight: 0 }}>
           {cycleSec != null && cycleSec > 0 && (
-            <span style={{ fontSize: 9, color: '#737373', lineHeight: 1 }}>
+            <span style={{ fontSize: 9, color: '#a3a3a3', lineHeight: 1 }}>
               {cycleSec}s / unit
             </span>
           )}
@@ -222,7 +228,7 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
             <span
               style={{
                 fontSize: 9,
-                color: '#666',
+                color: '#999',
                 lineHeight: 1.1,
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',

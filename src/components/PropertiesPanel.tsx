@@ -27,7 +27,7 @@ const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: 10,
   fontWeight: 500,
-  color: '#444',
+  color: '#999',
   textTransform: 'uppercase',
   letterSpacing: '0.1em',
   marginBottom: 6,
@@ -85,13 +85,13 @@ export default function PropertiesPanel({ node, onClose }: PropertiesPanelProps)
       >
         <div>
           <div style={{ fontSize: 11, fontWeight: 500, color: '#fff' }}>{config.name}</div>
-          <div style={{ fontSize: 10, color: '#444', marginTop: 2, fontFamily: 'monospace' }}>{node.id}</div>
+          <div style={{ fontSize: 10, color: '#777', marginTop: 2, fontFamily: 'monospace' }}>{node.id}</div>
         </div>
         <button
           onClick={onClose}
-          style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', padding: 4 }}
+          style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', padding: 4 }}
           onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#444')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#777')}
         >
           <X size={14} />
         </button>
@@ -136,8 +136,8 @@ export default function PropertiesPanel({ node, onClose }: PropertiesPanelProps)
               { label: 'H', value: node.data.height ?? config.defaultHeight },
             ].map(({ label: l, value }) => (
               <div key={l} style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: 4, padding: '7px 10px' }}>
-                <div style={{ fontSize: 9, color: '#444', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{l}</div>
-                <div style={{ fontSize: 13, fontFamily: 'monospace', color: '#888', marginTop: 2 }}>{value}px</div>
+                <div style={{ fontSize: 9, color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{l}</div>
+                <div style={{ fontSize: 13, fontFamily: 'monospace', color: '#ccc', marginTop: 2 }}>{value}px</div>
               </div>
             ))}
           </div>
@@ -152,8 +152,8 @@ export default function PropertiesPanel({ node, onClose }: PropertiesPanelProps)
               { label: 'Y', value: Math.round(node.position.y) },
             ].map(({ label: l, value }) => (
               <div key={l} style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: 4, padding: '7px 10px' }}>
-                <div style={{ fontSize: 9, color: '#444', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{l}</div>
-                <div style={{ fontSize: 13, fontFamily: 'monospace', color: '#888', marginTop: 2 }}>{value}</div>
+                <div style={{ fontSize: 9, color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{l}</div>
+                <div style={{ fontSize: 13, fontFamily: 'monospace', color: '#ccc', marginTop: 2 }}>{value}</div>
               </div>
             ))}
           </div>
@@ -162,7 +162,7 @@ export default function PropertiesPanel({ node, onClose }: PropertiesPanelProps)
         {/* Description */}
         <div>
           <label style={labelStyle}>Type</label>
-          <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5 }}>{config.description}</div>
+          <div style={{ fontSize: 12, color: '#aaa', lineHeight: 1.5 }}>{config.description}</div>
         </div>
       </div>
 

@@ -13,6 +13,7 @@ const DEFAULT_DIMS = {
   cnc: [160, 90], robot: [160, 90], welding: [160, 90],
   paint: [180, 90], assembly: [180, 90], inspection: [160, 90],
   quality: [160, 90], packaging: [180, 90], exit: [140, 70],
+  note: [200, 100],
 };
 
 /** Groq / OpenAI / Azure-compatible chat/completions */

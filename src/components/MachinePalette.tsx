@@ -13,6 +13,7 @@ const ACCENT: Record<string, string> = {
   quality:    '#2DD4BF',
   packaging:  '#818CF8',
   exit:       '#F87171',
+  note:       '#facc15',
 }
 
 interface MachinePaletteProps {
@@ -47,7 +48,7 @@ export default function MachinePalette({ onAddMachine }: MachinePaletteProps) {
         <div style={{ fontSize: 12, fontWeight: 500, color: '#fff', letterSpacing: '-0.01em' }}>
           Machinery
         </div>
-        <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>
+        <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>
           Click to add
         </div>
       </div>
@@ -66,7 +67,7 @@ export default function MachinePalette({ onAddMachine }: MachinePaletteProps) {
                   padding: '8px 4px 4px',
                   fontSize: 9,
                   fontWeight: 600,
-                  color: '#555',
+                  color: '#999',
                   textTransform: 'uppercase',
                   letterSpacing: '0.12em',
                 }}

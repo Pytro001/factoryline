@@ -20,7 +20,7 @@
     background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 1.5px, transparent 1.6px);
     background-size: 24px 24px;
     background-attachment: fixed;
-    color: #E2E8F0;
+    color: #e5e5e5;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -100,6 +100,12 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #3a3a3a;
+}
+
+/* ── Placeholder color — no bluish tint ────────────────────────────────────── */
+::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+  opacity: 1;
 }
 
 /* ── Utility ───────────────────────────────────────────────────────────────── */
