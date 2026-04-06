@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body;
     const prompt = body?.prompt;
-    const layout = await generateLayoutFromPrompt(prompt);
+    const layout = await generateLayoutFromPrompt(prompt, body?.production ?? null);
     return res.status(200).json(layout);
   } catch (err) {
     const code = err.statusCode || 500;

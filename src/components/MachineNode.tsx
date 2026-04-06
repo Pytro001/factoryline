@@ -9,6 +9,8 @@ export type MachineNodeData = {
   notes: string
   width: number
   height: number
+  cycleTimeSec?: number
+  isBottleneck?: boolean
   [key: string]: unknown
 }
 
@@ -46,6 +48,8 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
 
   const type = data.machineType as string
   const accent = ACCENT[type] ?? '#9CA3AF'
+  const isBottleneck = data.isBottleneck === true
+  const cycleSec = typeof data.cycleTimeSec === 'number' ? data.cycleTimeSec : null
 
   const firstSpec = (data.notes ?? '').split('·')[0].trim()
 
@@ -122,7 +126,11 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
           width: w,
           height: h,
           background: '#0f0f0f',
-          border: selected ? `1px solid ${accent}88` : '1px solid #2a2a2a',
+          border: isBottleneck
+            ? '2px solid #ea580c'
+            : selected
+              ? `1px solid ${accent}88`
+              : '1px solid #2a2a2a',
           borderRadius: 5,
           display: 'flex',
           flexDirection: 'column',
@@ -132,6 +140,7 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
           cursor: 'grab',
           userSelect: 'none',
           fontFamily: 'Inter, system-ui, sans-serif',
+          boxShadow: isBottleneck ? '0 0 20px rgba(234, 88, 12, 0.15)' : undefined,
         }}
       >
         {/* Type label */}
@@ -139,13 +148,20 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
           style={{
             fontSize: 9,
             fontWeight: 600,
-            color: accent,
+            color: isBottleneck ? '#fb923c' : accent,
             textTransform: 'uppercase',
             letterSpacing: '0.12em',
             lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 6,
           }}
         >
           {type}
+          {isBottleneck && (
+            <span style={{ fontSize: 7, letterSpacing: '0.06em', color: '#ea580c' }}>BOTTLENECK</span>
+          )}
         </span>
 
         {/* Station name */}
@@ -195,21 +211,28 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
           </span>
         )}
 
-        {/* First spec from notes */}
-        {firstSpec && (
-          <span
-            style={{
-              fontSize: 9,
-              color: '#666',
-              lineHeight: 1,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {firstSpec}
-          </span>
-        )}
+        {/* Cycle + first spec from notes */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minHeight: 0 }}>
+          {cycleSec != null && cycleSec > 0 && (
+            <span style={{ fontSize: 9, color: '#737373', lineHeight: 1 }}>
+              {cycleSec}s / unit
+            </span>
+          )}
+          {firstSpec && (
+            <span
+              style={{
+                fontSize: 9,
+                color: '#666',
+                lineHeight: 1.1,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {firstSpec}
+            </span>
+          )}
+        </div>
       </div>
 
       <Handle type="target"  position={Position.Left}   style={{ ...HANDLE_STYLE, left: -4 }} />

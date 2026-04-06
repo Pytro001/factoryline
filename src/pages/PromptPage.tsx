@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { Loader2, AlertCircle } from 'lucide-react'
-import { generateLayout, checkHealth, type FactoryLayout } from '@/lib/api'
+import {
+  generateLayout,
+  checkHealth,
+  type FactoryLayout,
+  type HealthStatus,
+  type ProductionParams,
+} from '@/lib/api'
 
 const EXAMPLES = [
   'Automotive assembly line',
@@ -18,21 +24,44 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
   const [prompt, setPrompt] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
-  const [ollamaReady, setOllamaReady] = useState<boolean | null>(null)
+  const [health, setHealth] = useState<HealthStatus | null>(null)
+  const [annualVolume, setAnnualVolume] = useState('')
+  const [workingDays, setWorkingDays] = useState('250')
+  const [shiftsPerDay, setShiftsPerDay] = useState('1')
+  const [hoursPerShift, setHoursPerShift] = useState('8')
+  const [oeePct, setOeePct] = useState('85')
+  const [showSchedule, setShowSchedule] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    checkHealth().then(({ ollamaRunning, modelReady }) => {
-      setOllamaReady(ollamaRunning && modelReady)
-    })
+    checkHealth().then(setHealth)
   }, [])
+
+  const parseProduction = (): ProductionParams | null => {
+    const raw = annualVolume.replace(/[\s,]/g, '')
+    const u = parseInt(raw, 10)
+    if (!Number.isFinite(u) || u <= 0) return null
+    const wd = parseInt(workingDays, 10)
+    const sh = parseInt(shiftsPerDay, 10)
+    const hs = parseFloat(hoursPerShift)
+    const oeeRaw = parseFloat(oeePct)
+    const p: ProductionParams = { unitsPerYear: u }
+    if (Number.isFinite(wd) && wd > 0) p.workingDaysPerYear = Math.min(366, Math.max(1, wd))
+    if (Number.isFinite(sh) && sh > 0) p.shiftsPerDay = Math.min(4, Math.max(1, sh))
+    if (Number.isFinite(hs) && hs > 0) p.hoursPerShift = Math.min(24, Math.max(0.5, hs))
+    if (Number.isFinite(oeeRaw)) {
+      const r = oeeRaw > 1 ? oeeRaw / 100 : oeeRaw
+      p.oee = Math.min(1, Math.max(0.05, r))
+    }
+    return p
+  }
 
   const handleGenerate = async () => {
     if (!prompt.trim() || status === 'generating') return
     setError('')
     setStatus('generating')
     try {
-      const layout = await generateLayout(prompt.trim())
+      const layout = await generateLayout(prompt.trim(), parseProduction())
       onGenerated(layout)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generation failed')
@@ -66,11 +95,29 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
           Factoryline
         </span>
 
-        {/* Show warning only when Ollama is not running */}
-        {ollamaReady === false && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
-            <span style={{ fontSize: 13, color: '#555' }}>Run: ollama serve</span>
+        {health && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, maxWidth: '52%', justifyContent: 'flex-end' }}>
+            {health.llmReady ? (
+              <>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: '#666', textAlign: 'right', lineHeight: 1.3 }}>
+                  AI · {health.provider}
+                  {health.model ? ` · ${health.model}` : ''}
+                </span>
+              </>
+            ) : health.demoMode ? (
+              <>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#a78bfa', display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ fontSize: 11, color: '#666', textAlign: 'right', lineHeight: 1.35 }}>
+                  Demo layouts on Vercel. Add <span style={{ color: '#888' }}>GROQ_API_KEY</span> (free) for live AI.
+                </span>
+              </>
+            ) : (
+              <>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', display: 'inline-block', flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: '#555' }}>Run: ollama serve — or set GROQ_API_KEY</span>
+              </>
+            )}
           </div>
         )}
       </nav>
@@ -78,23 +125,33 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
       {/* Main */}
       <main
         className="flex-1 flex flex-col"
-        style={{ maxWidth: 640, margin: '0 auto', width: '100%', padding: '60px 32px 80px' }}
+        style={{ maxWidth: 720, margin: '0 auto', width: '100%', padding: '60px 32px 80px' }}
       >
-        {/* Hero */}
-        <h1
+        {/* Hero — flex centers the text block as a whole; lines stay aligned to each other */}
+        <div
           style={{
-            fontSize: 'clamp(2.125rem, 5.5vw + 1.25rem, 4rem)',
-            fontWeight: 500,
-            lineHeight: 1.12,
-            color: '#fff',
-            letterSpacing: '-0.035em',
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
             marginBottom: 48,
-            textAlign: 'center',
           }}
         >
-          <span style={{ display: 'block', whiteSpace: 'nowrap' }}>Optimize your factory</span>
-          <span style={{ display: 'block', marginTop: '0.06em' }}>with one prompt.</span>
-        </h1>
+          <h1
+            style={{
+              fontSize: 'clamp(2.125rem, 5.5vw + 1.25rem, 4rem)',
+              fontWeight: 500,
+              lineHeight: 1.12,
+              color: '#fff',
+              letterSpacing: '-0.035em',
+              margin: 0,
+              textAlign: 'left',
+              maxWidth: '100%',
+            }}
+          >
+            <span style={{ display: 'block', whiteSpace: 'nowrap' }}>Optimize your factory</span>
+            <span style={{ display: 'block', marginTop: '0.06em' }}>with one prompt.</span>
+          </h1>
+        </div>
 
         {/* Input */}
         <div
@@ -134,6 +191,76 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
               boxSizing: 'border-box',
             }}
           />
+
+          <div
+            style={{
+              padding: '12px 18px 14px',
+              borderTop: '1px solid #111',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+              <label style={{ fontSize: 11, color: '#555', textTransform: 'uppercase', letterSpacing: '0.07em', flexShrink: 0 }}>
+                Annual output
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={annualVolume}
+                onChange={(e) => setAnnualVolume(e.target.value)}
+                disabled={status === 'generating'}
+                placeholder="e.g. 1000000 (optional — enables takt & bottleneck)"
+                style={{
+                  flex: '1 1 200px',
+                  minWidth: 160,
+                  background: '#0a0a0a',
+                  border: '1px solid #222',
+                  borderRadius: 4,
+                  color: '#e5e5e5',
+                  fontSize: 13,
+                  padding: '8px 10px',
+                  outline: 'none',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowSchedule((v) => !v)}
+                disabled={status === 'generating'}
+                style={{
+                  fontSize: 11,
+                  color: showSchedule ? '#fff' : '#666',
+                  background: 'none',
+                  border: '1px solid #2a2a2a',
+                  borderRadius: 4,
+                  padding: '6px 10px',
+                  cursor: status === 'generating' ? 'not-allowed' : 'pointer',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}
+              >
+                Schedule &amp; OEE
+              </button>
+            </div>
+            {showSchedule && (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                  gap: 10,
+                }}
+              >
+                <Field label="Days / yr" value={workingDays} onChange={setWorkingDays} disabled={status === 'generating'} />
+                <Field label="Shifts / day" value={shiftsPerDay} onChange={setShiftsPerDay} disabled={status === 'generating'} />
+                <Field label="Hours / shift" value={hoursPerShift} onChange={setHoursPerShift} disabled={status === 'generating'} />
+                <Field label="OEE %" value={oeePct} onChange={setOeePct} disabled={status === 'generating'} hint="e.g. 85" />
+              </div>
+            )}
+            <p style={{ margin: 0, fontSize: 11, color: '#444', lineHeight: 1.4 }}>
+              With a target volume we compute effective takt, mark the slowest process step, and estimate serial line capacity. Add shifts or OEE so the model sizes <code style={{ color: '#555' }}>cycleTimeSec</code> on each station.
+            </p>
+          </div>
 
           {/* Input footer */}
           <div
@@ -245,5 +372,43 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
       </main>
       </div>
     </div>
+  )
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  disabled,
+  hint,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  disabled?: boolean
+  hint?: string
+}) {
+  return (
+    <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <span style={{ fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+      <input
+        type="text"
+        inputMode="decimal"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        placeholder={hint}
+        style={{
+          background: '#0a0a0a',
+          border: '1px solid #222',
+          borderRadius: 4,
+          color: '#e5e5e5',
+          fontSize: 13,
+          padding: '8px 10px',
+          outline: 'none',
+          fontFamily: 'Inter, system-ui, sans-serif',
+        }}
+      />
+    </label>
   )
 }

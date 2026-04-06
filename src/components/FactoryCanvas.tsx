@@ -41,6 +41,8 @@ function buildNodes(layout: FactoryLayout): Node<MachineNodeData>[] {
       notes: n.notes ?? '',
       width: n.width ?? getMachineType(n.machineType).defaultWidth,
       height: n.height ?? getMachineType(n.machineType).defaultHeight,
+      cycleTimeSec: n.cycleTimeSec,
+      isBottleneck: n.isBottleneck,
     },
     style: { width: n.width ?? getMachineType(n.machineType).defaultWidth },
   }))
@@ -78,6 +80,13 @@ function FactoryCanvasInner({ layout, onFitViewReady, onCountsChange }: FactoryC
   const [edges, setEdges, onEdgesChange] = useEdgesState(buildEdges(layout))
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const idCounter = useRef(layout.nodes.length + 100)
+
+  useEffect(() => {
+    setNodes(buildNodes(layout))
+    setEdges(buildEdges(layout))
+    idCounter.current = layout.nodes.length + 100
+    setSelectedNodeId(null)
+  }, [layout, setNodes, setEdges])
 
   // Expose fitView to parent
   useEffect(() => {
