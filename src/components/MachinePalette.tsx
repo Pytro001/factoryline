@@ -63,7 +63,7 @@ export default function MachinePalette({ onAddMachine }: MachinePaletteProps) {
     <div
       style={{
         width: 200,
-        background: '#000',
+        background: 'rgba(10, 10, 10, 0.78)',
         borderRight: '1px solid #1a1a1a',
         display: 'flex',
         flexDirection: 'column',
@@ -110,7 +110,7 @@ export default function MachinePalette({ onAddMachine }: MachinePaletteProps) {
         >
           <Search size={14} style={{ color: '#666', flexShrink: 0 }} aria-hidden />
           <input
-            type="search"
+            type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search machines…"

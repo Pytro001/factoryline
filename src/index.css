@@ -32,6 +32,10 @@
 }
 
 /* ── React Flow overrides ──────────────────────────────────────────────────── */
+.react-flow {
+  background: transparent !important;
+}
+
 .react-flow__attribution {
   display: none !important;
 }

@@ -241,10 +241,8 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
         </div>
       </div>
 
-      <Handle type="target"  position={Position.Left}   style={{ ...HANDLE_STYLE, left: -4 }} />
-      <Handle type="source"  position={Position.Right}  style={{ ...HANDLE_STYLE, right: -4 }} />
-      <Handle type="target"  position={Position.Top}    style={{ ...HANDLE_STYLE, top: -4 }} />
-      <Handle type="source"  position={Position.Bottom} style={{ ...HANDLE_STYLE, bottom: -4 }} />
+      <Handle type="target" position={Position.Left} style={{ ...HANDLE_STYLE, left: -4 }} />
+      <Handle type="source" position={Position.Right} style={{ ...HANDLE_STYLE, right: -4 }} />
     </>
   )
 })

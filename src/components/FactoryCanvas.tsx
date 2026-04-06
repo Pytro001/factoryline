@@ -2,8 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
-  Background,
-  BackgroundVariant,
   Controls,
   MiniMap,
   useNodesState,
@@ -192,14 +190,8 @@ function FactoryCanvasInner({ layout, onFitViewReady, onCountsChange }: FactoryC
             maxZoom={4}
             snapToGrid
             snapGrid={[10, 10]}
-            className="bg-black"
+            className="bg-transparent"
           >
-            <Background
-              variant={BackgroundVariant.Dots}
-              gap={28}
-              size={1}
-              color="#2a2a2a"
-            />
             <Controls showInteractive={false} />
             <MiniMap
               style={{

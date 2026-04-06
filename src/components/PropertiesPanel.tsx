@@ -63,7 +63,7 @@ export default function PropertiesPanel({ node, onClose }: PropertiesPanelProps)
     <div
       style={{
         width: 260,
-        background: '#000',
+        background: 'rgba(10, 10, 10, 0.82)',
         borderLeft: '1px solid #1a1a1a',
         display: 'flex',
         flexDirection: 'column',

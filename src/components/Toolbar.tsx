@@ -13,7 +13,7 @@ export default function Toolbar({ title, onBack, onFitView, nodeCount, edgeCount
     <header
       style={{
         height: 44,
-        background: '#000',
+        background: 'transparent',
         borderBottom: '1px solid #1a1a1a',
         display: 'flex',
         alignItems: 'center',
