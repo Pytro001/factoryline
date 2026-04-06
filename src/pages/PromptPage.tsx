@@ -20,12 +20,14 @@ interface PromptPageProps {
 type Status = 'idle' | 'generating' | 'error'
 
 const ANNUAL_OUTPUT_LABEL_COLOR = '#999'
+const MAX_ANNUAL_OUTPUT = 100_000_000
 
 function formatAnnualOutputInput(raw: string): string {
   const digits = raw.replace(/\D/g, '')
   if (digits === '') return ''
-  const n = parseInt(digits, 10)
+  let n = parseInt(digits, 10)
   if (!Number.isFinite(n) || n === 0) return digits === '' ? '' : '0'
+  n = Math.min(n, MAX_ANNUAL_OUTPUT)
   return n.toLocaleString('en-US')
 }
 
@@ -40,7 +42,7 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
     const raw = annualVolume.replace(/[\s,]/g, '')
     const u = parseInt(raw, 10)
     if (!Number.isFinite(u) || u <= 0) return null
-    return { unitsPerYear: u }
+    return { unitsPerYear: Math.min(u, MAX_ANNUAL_OUTPUT) }
   }
 
   const handleGenerate = async () => {

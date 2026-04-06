@@ -2,6 +2,8 @@
  * Takt + bottleneck analysis for factory layouts (serial line heuristic).
  */
 
+const MAX_UNITS_PER_YEAR = 100_000_000
+
 const PROCESSING_TYPES = new Set([
   'assembly',
   'cnc',
@@ -52,7 +54,7 @@ export function normalizeProductionInput(raw) {
   const units = Number(raw.unitsPerYear)
   if (!Number.isFinite(units) || units <= 0) return null
   return {
-    unitsPerYear: Math.round(units),
+    unitsPerYear: Math.min(MAX_UNITS_PER_YEAR, Math.round(units)),
     workingDaysPerYear: clampInt(raw.workingDaysPerYear, 1, 366, 250),
     shiftsPerDay: clampInt(raw.shiftsPerDay, 1, 4, 1),
     hoursPerShift: clampNumber(raw.hoursPerShift, 0.5, 24, 8),
