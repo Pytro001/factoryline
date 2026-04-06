@@ -114,6 +114,10 @@
   opacity: 0.55;
 }
 
+.palette-search-input::placeholder {
+  color: #666;
+}
+
 /* ── Utility ───────────────────────────────────────────────────────────────── */
 .line-clamp-2 {
   display: -webkit-box;
