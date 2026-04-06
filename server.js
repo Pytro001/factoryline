@@ -118,6 +118,28 @@ const DEFAULT_DIMS = {
   quality: [160, 90], packaging: [180, 90], exit: [140, 70],
 };
 
+// ── Normalize LLM output before geometry fix ───────────────────────────────────
+function normalizeNodes(layout) {
+  if (!Array.isArray(layout.nodes)) return;
+  layout.nodes.forEach((n, i) => {
+    if (!n || typeof n !== 'object') return;
+    if (!n.id || typeof n.id !== 'string') n.id = `node_${i + 1}`;
+    if (n.row !== undefined && n.row !== null) {
+      let row = Number(n.row);
+      if (!Number.isFinite(row) || row < 0) row = 0;
+      n.row = Math.floor(row);
+    }
+    if (n.slot !== undefined && n.slot !== null) {
+      let slot = Number(n.slot);
+      if (!Number.isFinite(slot) || slot < 0) slot = 0;
+      n.slot = Math.floor(slot);
+    }
+    if (n.machineType && typeof n.machineType === 'string') {
+      n.machineType = n.machineType.toLowerCase().trim();
+    }
+  });
+}
+
 // ── Post-process: convert row/slot to x,y and fix overlaps ───────────────────
 function fixLayout(layout) {
   const ROW_HEIGHT = 160;
@@ -132,8 +154,10 @@ function fixLayout(layout) {
     n.height = dh;
   });
 
-  // If the model used row/slot (preferred), convert to x/y
-  const hasRowSlot = layout.nodes.some((n) => n.row !== undefined && n.slot !== undefined);
+  // Use row/slot only when EVERY node has both (otherwise use x/y fallback)
+  const hasRowSlot =
+    layout.nodes.length > 0 &&
+    layout.nodes.every((n) => n != null && n.row !== undefined && n.slot !== undefined);
 
   if (hasRowSlot) {
     // Group by row
@@ -275,8 +299,16 @@ app.post('/api/generate', async (req, res) => {
     layout.title = layout.title || 'Factory Floor Plan';
     layout.edges = layout.edges || [];
 
-    // Convert row/slot → x/y and fix any overlaps
-    fixLayout(layout);
+    try {
+      normalizeNodes(layout);
+      fixLayout(layout);
+    } catch (fixErr) {
+      console.error('[generate] fixLayout:', fixErr);
+      return res.status(422).json({
+        error: `Could not build layout from model output: ${fixErr.message}`,
+        hint: 'layout_fix_failed',
+      });
+    }
 
     console.log(`[generate] OK — ${layout.nodes.length} nodes, ${layout.edges.length} edges`);
     res.json(layout);
