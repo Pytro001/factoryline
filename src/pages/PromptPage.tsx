@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Loader2, AlertCircle } from 'lucide-react'
 import {
+  createEmptyFactoryLayout,
   generateLayout,
   type FactoryLayout,
   type ProductionParams,
@@ -62,6 +63,12 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') handleGenerate()
+  }
+
+  const handleStartFromScratch = () => {
+    if (status === 'generating') return
+    setError('')
+    onGenerated(createEmptyFactoryLayout())
   }
 
   const canGenerate = prompt.trim().length > 5 && status !== 'generating'
@@ -156,6 +163,46 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
               boxSizing: 'border-box',
             }}
           />
+
+          <div
+            style={{
+              padding: '8px 16px 10px',
+              borderTop: '1px solid #111',
+              display: 'flex',
+              justifyContent: 'flex-start',
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleStartFromScratch}
+              disabled={status === 'generating'}
+              style={{
+                background: 'none',
+                border: '1px solid #2a2a2a',
+                borderRadius: 4,
+                color: '#999',
+                fontSize: 12,
+                fontWeight: 500,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                padding: '6px 12px',
+                cursor: status === 'generating' ? 'not-allowed' : 'pointer',
+                transition: 'border-color 0.12s, color 0.12s, background 0.12s',
+              }}
+              onMouseEnter={(e) => {
+                if (status === 'generating') return
+                e.currentTarget.style.borderColor = '#444'
+                e.currentTarget.style.color = '#fff'
+                e.currentTarget.style.background = '#111'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#2a2a2a'
+                e.currentTarget.style.color = '#999'
+                e.currentTarget.style.background = 'none'
+              }}
+            >
+              Start from scratch
+            </button>
+          </div>
 
           <div
             style={{
