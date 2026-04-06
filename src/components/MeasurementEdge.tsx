@@ -56,7 +56,7 @@ const MeasurementEdge = memo(
                 style={{
                   backgroundColor: selected ? '#1e3a5f' : '#111',
                   borderColor: selected ? '#60A5FA' : '#333',
-                  color: selected ? '#93C5FD' : '#9CA3AF',
+                  color: selected ? '#93C5FD' : '#ccc',
                 }}
               >
                 {label}

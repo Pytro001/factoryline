@@ -14,7 +14,6 @@ export type MachineNodeData = {
 
 export type MachineFlowNode = Node<MachineNodeData, 'machine'>
 
-// Cursor's washed-out accent palette — one color per machine type
 const ACCENT: Record<string, string> = {
   conveyor:   '#94A3B8',
   cnc:        '#60A5FA',
@@ -48,7 +47,6 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
   const type = data.machineType as string
   const accent = ACCENT[type] ?? '#9CA3AF'
 
-  // Show only the first spec from notes (before the first ·)
   const firstSpec = (data.notes ?? '').split('·')[0].trim()
 
   useEffect(() => {
@@ -75,7 +73,6 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
 
   return (
     <>
-      {/* Toolbar — appears above on select */}
       <NodeToolbar isVisible={selected} position={Position.Top} offset={6}>
         <div
           style={{
@@ -93,12 +90,12 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setEditing(true) }}
             style={{
               display: 'flex', alignItems: 'center', gap: 4,
-              padding: '3px 8px', fontSize: 11, color: '#888',
+              padding: '3px 8px', fontSize: 11, color: '#aaa',
               background: 'none', border: 'none', borderRadius: 3,
               cursor: 'pointer', fontFamily: 'inherit',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#888')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#aaa')}
           >
             <Pencil size={9} /> Rename
           </button>
@@ -107,28 +104,26 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
             onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); deleteNode(id) }}
             style={{
               display: 'flex', alignItems: 'center', gap: 4,
-              padding: '3px 8px', fontSize: 11, color: '#666',
+              padding: '3px 8px', fontSize: 11, color: '#888',
               background: 'none', border: 'none', borderRadius: 3,
               cursor: 'pointer', fontFamily: 'inherit',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#F87171')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#666')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#888')}
           >
             <Trash2 size={9} /> Delete
           </button>
         </div>
       </NodeToolbar>
 
-      {/* ── Node body ─────────────────────────────────────────────────────────── */}
       <div
         onDoubleClick={() => setEditing(true)}
         style={{
           width: w,
           height: h,
           background: '#0f0f0f',
-          border: selected ? `1px solid ${accent}55` : '1px solid #252525',
-          borderLeft: `3px solid ${accent}`,
-          borderRadius: 4,
+          border: selected ? `1px solid ${accent}88` : '1px solid #2a2a2a',
+          borderRadius: 5,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -139,7 +134,7 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
           fontFamily: 'Inter, system-ui, sans-serif',
         }}
       >
-        {/* Type label — colored */}
+        {/* Type label */}
         <span
           style={{
             fontSize: 9,
@@ -168,7 +163,7 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
                 fontSize: 12,
                 fontWeight: 500,
                 fontFamily: 'Inter, system-ui, sans-serif',
-                color: '#e5e5e5',
+                color: '#fff',
                 background: '#1a1a1a',
                 border: `1px solid ${accent}66`,
                 borderRadius: 3,
@@ -188,7 +183,7 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
             style={{
               fontSize: 12,
               fontWeight: 500,
-              color: '#e5e5e5',
+              color: '#fff',
               lineHeight: 1.3,
               overflow: 'hidden',
               display: '-webkit-box',
@@ -205,7 +200,7 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
           <span
             style={{
               fontSize: 9,
-              color: '#3a3a3a',
+              color: '#666',
               lineHeight: 1,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -217,7 +212,6 @@ const MachineNode = memo(({ id, data, selected }: NodeProps<MachineFlowNode>) =>
         )}
       </div>
 
-      {/* Handles */}
       <Handle type="target"  position={Position.Left}   style={{ ...HANDLE_STYLE, left: -4 }} />
       <Handle type="source"  position={Position.Right}  style={{ ...HANDLE_STYLE, right: -4 }} />
       <Handle type="target"  position={Position.Top}    style={{ ...HANDLE_STYLE, top: -4 }} />

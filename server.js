@@ -10,8 +10,21 @@ app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
 // ── System prompt for structured factory layout generation ────────────────────
-const SYSTEM_PROMPT = `You are an expert industrial factory floor plan designer creating professional top-down 2D factory layouts.
-Your output will be rendered as an engineering drawing — clean, structured, and readable.
+const SYSTEM_PROMPT = `You are an expert lean manufacturing engineer designing top-down 2D factory floor plans.
+You think in terms of material flow, takt time, and waste elimination.
+
+LEAN MANUFACTURING KNOWLEDGE — apply these principles to every layout you design:
+- No part warehouses. First-tier suppliers deliver materials hourly, directly to the line.
+- Minimal floor space. Workers must be close enough for face-to-face communication. No room for excess inventory.
+- Each line worker keeps less than one hour of inventory at their station.
+- Every worker has the authority to stop the line (andon) when a defect is found.
+- Defective parts are marked and sent to a small quality control area where a team applies root-cause analysis to eliminate the problem at its source.
+- Rework areas are tiny because defects are eliminated at root cause, not patched downstream.
+- Finished products move directly from end-of-line to outbound trucks. No finished goods warehouse.
+- Every line has real-time visual management: screens showing daily target, units produced, personnel status, equipment health, and where help is needed.
+- If an emerging innovation exists that competitors ignore due to cost or complexity, it should be fast-tracked through a dedicated development cell with top resource priority.
+
+Use this knowledge to inform station names, notes, and flow logic — but do NOT list these as bullet points in the output. They should be reflected naturally in the factory design.
 
 CRITICAL: Return ONLY a raw JSON object — no markdown, no code blocks, no explanation, nothing else.
 
@@ -21,13 +34,11 @@ Required JSON format:
   "nodes": [
     {
       "id": "node_1",
-      "machineType": "storage",
-      "label": "Raw Material Storage",
-      "x": 80,
-      "y": 160,
-      "width": 220,
-      "height": 160,
-      "notes": "Steel coils & aluminum sheet stock · Capacity: 40t · FIFO rotation"
+      "machineType": "loading",
+      "label": "Inbound Supplier Dock",
+      "row": 0,
+      "slot": 0,
+      "notes": "JIT hourly delivery · 4 dock bays · Kanban pull signal"
     }
   ],
   "edges": [
@@ -35,133 +46,156 @@ Required JSON format:
       "id": "edge_1",
       "source": "node_1",
       "target": "node_2",
-      "label": "6m"
+      "label": "3m"
     }
   ]
 }
 
+IMPORTANT: Do NOT include x, y, width, or height — only "row" and "slot". The rendering engine handles positioning.
+
+ROW AND SLOT SYSTEM:
+- "row" = which horizontal production line (0, 1, 2, or 3). Row 0 is the top line, row 1 below it, etc.
+- "slot" = left-to-right position within that row (0 = leftmost, 1 = next, 2 = next, etc.)
+- Use at least 2 rows and at most 4 rows.
+- Each row should have 3–6 nodes.
+- Slots must be sequential within each row starting from 0.
+
 Valid machineType values (use ONLY these exact strings):
-- storage    → raw material storage / warehouse / input buffer
-- loading    → loading dock / truck bay / shipping/receiving
+- loading    → supplier dock / inbound receiving / JIT delivery point
+- storage    → line-side buffer / kanban supermarket (small, < 1 hour inventory)
 - conveyor   → conveyor belt / transfer line / AGV lane
 - cnc        → CNC machine / milling / turning / laser cutting
 - robot      → robotic arm / automated cell / pick-and-place
 - welding    → welding station / spot welder / MIG/TIG
 - paint      → paint booth / powder coating / surface treatment
-- assembly   → assembly station / workbench / manual assembly
-- inspection → inspection station / CMM / vision system / test bench
-- quality    → quality control / end-of-line test / final check
-- packaging  → packaging line / labeling / boxing / palletizing
-- exit       → shipping dock / finished goods / truck exit
+- assembly   → assembly station / manual workbench / sub-assembly cell
+- inspection → in-line inspection / vision system / CMM / andon check
+- quality    → quality control cell / root-cause analysis station / 5-why team
+- packaging  → packaging / labeling / boxing / direct-to-truck prep
+- exit       → outbound truck dock / shipping lane
 
-LAYOUT RULES — follow ALL of these exactly:
+DESIGN RULES:
 
-1. FLOW DIRECTION: Layout flows LEFT → RIGHT as a production sequence:
-   - x: 80–350    → Incoming: loading dock, raw material storage
-   - x: 350–700   → Primary processing: CNC, welding, forming
-   - x: 700–1050  → Sub-assembly, robotic operations, paint
-   - x: 1050–1350 → Final assembly, treatment
-   - x: 1350–1600 → Quality control, packaging, shipping out
+1. FLOW: Left-to-right material flow. Slot 0 = raw material entry, highest slot = exit.
+   - Row 0: Main production line (longest, most stations).
+   - Row 1: Sub-assembly or parallel processing that MERGES into main line.
+   - Row 2+: Additional sub-lines or support (quality cell, rework, dev cell).
 
-2. VERTICAL ARRANGEMENT — use PARALLEL LINES (y: 80–900):
-   - Mandatory: generate at least 2 parallel production lines
-   - Line A (main):  y ≈ 80–260
-   - Line B (sub):   y ≈ 360–540
-   - Line C (optional): y ≈ 640–820
-   - Minimum vertical gap between any two nodes on DIFFERENT rows: 200px
-   - Conveyors and conveyors only may span rows (diagonal is OK)
+2. CONVERGENCE: Sub-assembly rows MUST feed into the main line. Model this with edges from row 1/2 nodes pointing to a node in row 0 (or to a shared assembly/merge node).
+   - At least 1 convergence point where 2+ edges meet at a single node.
 
-3. CONVERGENCE — this is critical:
-   - Parallel sub-lines MUST merge into a shared downstream node.
-   - Example: nodes on Line A and Line B both output edges to the SAME assembly or final inspection node.
-   - A convergence node (e.g. assembly) should have 2 or more incoming edges from different rows.
-   - Include at least ONE convergence point in every layout.
-   - Model this explicitly: e.g. edge from node_4 (Line A) → node_9, AND edge from node_8 (Line B) → node_9.
+3. NODE COUNT: 12–16 nodes total. Never fewer than 12.
 
-4. SPACING: Minimum 200px horizontal gap between node LEFT edges in the SAME row (y-band).
-   Machines must NEVER overlap. Check every node pair.
+4. EDGES — strict connectivity:
+   - Within a row: every consecutive pair of nodes is connected (slot 0 → slot 1 → slot 2 → ...).
+   - Cross-row: sub-line final node connects to a merge point on the main line.
+   - Every node (except the very first and very last in the entire layout) has at least 1 incoming AND 1 outgoing edge.
 
-5. NODE COUNT: MINIMUM 12 nodes, MAXIMUM 16 nodes. No exceptions — never fewer than 12.
+5. LABELS: Specific, descriptive engineering names.
+   Good: "Body Frame Spot Welding Cell", "Andon Inspection Gate", "Kanban Buffer Rack"
+   Bad: "Machine 1", "Station A", "Process 3"
 
-6. EDGES — strict connectivity:
-   - Every node except the very first and very last must have AT LEAST one incoming AND one outgoing edge.
-   - Convergence nodes may have 2–3 incoming edges.
-   - Branch nodes may have 2 outgoing edges (when a line splits into parallel sub-lines).
-   - Add a conveyor edge whenever a material moves more than 8m between stations.
+6. NOTES: 2–3 lean manufacturing specs per node, separated by " · ".
+   Include things like: takt time, cycle time, output rate, operator count, inventory level, andon capability, kanban signals.
+   Examples:
+   "Takt: 60s · 2 operators · Andon-enabled"
+   "Cycle: 45s · Output: 80/hr · Line-side kanban"
+   "5-why team · Defect rate < 0.1% · Visual mgmt board"
 
-7. LABELS: Specific engineering names only — e.g. "Stator Winding Jig", "Body Frame Welding Cell A", "Final AOI Test Bench".
-   NEVER use generic names like "Machine 1", "Station A", or "Process 3".
+7. EDGE LABELS: Realistic distances in meters: "2m", "4.5m", "8m". Keep distances short (lean = compact).
 
-8. NOTES: EXACTLY 2–3 engineering specs per node, separated by " · " (middle dot + space).
-   Examples: "Cycle time: 45s · Output: 120 pcs/hr · 2 operators"
-             "Temp: 185°C · Dwell: 22 min · Capacity: 800L"
-             "Accuracy: ±0.02mm · CMM probe · Auto reject"
-   Always include cycle time OR output rate AND at least one other spec.
+8. FACTORY LOGIC:
+   - Start with inbound (loading) → line-side buffer (storage, small) → processing stations
+   - End with inspection → packaging → outbound truck dock (exit)
+   - Quality/rework cell should be a short side-branch, not on the main line
+   - Everything compact: distances should be 1–8m between stations, rarely more than 12m`;
 
-9. MEASUREMENTS: Edge labels = realistic distances in meters — e.g. "3.5m", "12m", "0.8m".
+// ── Canonical node dimensions ────────────────────────────────────────────────
+const DEFAULT_DIMS = {
+  loading: [200, 90], storage: [200, 90], conveyor: [240, 55],
+  cnc: [160, 90], robot: [160, 90], welding: [160, 90],
+  paint: [180, 90], assembly: [180, 90], inspection: [160, 90],
+  quality: [160, 90], packaging: [180, 90], exit: [140, 70],
+};
 
-Node dimensions — use EXACTLY these values (width × height in pixels):
-loading=200×90, storage=200×90, conveyor=240×55, cnc=160×90, robot=160×90,
-welding=160×90, paint=180×90, assembly=180×90, inspection=160×90,
-quality=160×90, packaging=180×90, exit=140×70
-
-STRICT ROW ALIGNMENT — every node in the same production line must share the SAME y coordinate.
-- All Line A nodes: identical y value (e.g. y=100 for all)
-- All Line B nodes: identical y value (e.g. y=260 for all)
-- All Line C nodes: identical y value (e.g. y=420 for all)
-- Never stagger nodes vertically within the same row.
-- Only cross-row conveyor or merge edges may connect different y bands.
-- x spacing between consecutive nodes in same row: 40–80px gap between right edge of one and left edge of next.`;
-
-// ── Post-process: fix overlapping nodes ──────────────────────────────────────
-// Groups nodes into rows by proximity, then redistributes x positions so
-// no two nodes in the same row overlap. Also snaps each row to a clean y.
+// ── Post-process: convert row/slot to x,y and fix overlaps ───────────────────
 function fixLayout(layout) {
-  const GAP = 50;          // min gap between nodes in the same row
-  const ROW_SNAP = 20;     // y values within this range = same row
-  const ROW_HEIGHT = 200;  // vertical distance between rows
+  const ROW_HEIGHT = 160;
+  const ROW_START_Y = 80;
+  const COL_START_X = 80;
+  const GAP_X = 60;
 
-  // Assign canonical dimensions if missing
-  const DEFAULT_DIMS = {
-    loading: [200, 90], storage: [200, 90], conveyor: [240, 55],
-    cnc: [160, 90], robot: [160, 90], welding: [160, 90],
-    paint: [180, 90], assembly: [180, 90], inspection: [160, 90],
-    quality: [160, 90], packaging: [180, 90], exit: [140, 70],
-  };
-
+  // Assign dimensions
   layout.nodes.forEach((n) => {
     const [dw, dh] = DEFAULT_DIMS[n.machineType] ?? [160, 90];
-    if (!n.width  || n.width  < 10) n.width  = dw;
-    if (!n.height || n.height < 10) n.height = dh;
+    n.width  = dw;
+    n.height = dh;
   });
 
-  // Group nodes into rows based on y proximity
-  const rows = [];
-  const sorted = [...layout.nodes].sort((a, b) => a.y - b.y);
+  // If the model used row/slot (preferred), convert to x/y
+  const hasRowSlot = layout.nodes.some((n) => n.row !== undefined && n.slot !== undefined);
 
-  for (const node of sorted) {
-    const row = rows.find((r) => Math.abs(r.y - node.y) <= ROW_SNAP);
-    if (row) {
-      row.nodes.push(node);
-    } else {
-      rows.push({ y: node.y, nodes: [node] });
+  if (hasRowSlot) {
+    // Group by row
+    const rowMap = {};
+    for (const n of layout.nodes) {
+      const r = n.row ?? 0;
+      if (!rowMap[r]) rowMap[r] = [];
+      rowMap[r].push(n);
     }
+
+    // Sort rows by row number, nodes within row by slot
+    const rowKeys = Object.keys(rowMap).map(Number).sort((a, b) => a - b);
+
+    for (let ri = 0; ri < rowKeys.length; ri++) {
+      const nodes = rowMap[rowKeys[ri]];
+      nodes.sort((a, b) => (a.slot ?? 0) - (b.slot ?? 0));
+
+      const y = ROW_START_Y + ri * ROW_HEIGHT;
+      let cursor = COL_START_X;
+
+      for (const n of nodes) {
+        n.x = cursor;
+        n.y = y;
+        cursor += n.width + GAP_X;
+      }
+    }
+  } else {
+    // Fallback: model used raw x/y — group by y proximity and redistribute
+    const ROW_SNAP = 60;
+    const rows = [];
+    const sorted = [...layout.nodes].sort((a, b) => (a.y ?? 0) - (b.y ?? 0));
+
+    for (const node of sorted) {
+      const row = rows.find((r) => Math.abs(r.y - (node.y ?? 0)) <= ROW_SNAP);
+      if (row) {
+        row.nodes.push(node);
+      } else {
+        rows.push({ y: node.y ?? 0, nodes: [node] });
+      }
+    }
+
+    rows.forEach((row, rowIdx) => {
+      row.nodes.sort((a, b) => (a.x ?? 0) - (b.x ?? 0));
+      const y = ROW_START_Y + rowIdx * ROW_HEIGHT;
+      let cursor = COL_START_X;
+      for (const n of row.nodes) {
+        n.y = y;
+        n.x = cursor;
+        cursor += n.width + GAP_X;
+      }
+    });
   }
 
-  // Snap rows to clean y positions and redistribute x
-  rows.forEach((row, rowIdx) => {
-    const canonicalY = rowIdx * ROW_HEIGHT + 80;
-
-    // Sort nodes in this row by their original x
-    row.nodes.sort((a, b) => a.x - b.x);
-
-    let cursor = 80; // start x
-    for (const node of row.nodes) {
-      node.y = canonicalY;
-      node.x = cursor;
-      cursor += node.width + GAP;
-    }
+  // Clean up row/slot fields (not needed by frontend)
+  layout.nodes.forEach((n) => {
+    delete n.row;
+    delete n.slot;
   });
+
+  // Validate edges — remove any referencing non-existent nodes
+  const nodeIds = new Set(layout.nodes.map((n) => n.id));
+  layout.edges = layout.edges.filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target));
 
   return layout;
 }
@@ -193,7 +227,7 @@ app.post('/api/generate', async (req, res) => {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 120_000); // 2 min max
+  const timeout = setTimeout(() => controller.abort(), 120_000);
 
   try {
     console.log(`[generate] Prompt: "${prompt.slice(0, 80)}..."`);
@@ -208,11 +242,11 @@ app.post('/api/generate', async (req, res) => {
           { role: 'system', content: SYSTEM_PROMPT },
           {
             role: 'user',
-            content: `Design a complete, professional factory floor plan for:\n\n"${prompt}"\n\nRequirements checklist before you output:\n- At least 12 nodes total\n- At least 2 parallel production lines (different y bands, 200px+ apart)\n- At least 1 convergence point where lines merge (multiple edges into same node)\n- Every node has 2-3 spec notes separated by \" · \"\n- Return ONLY valid JSON, nothing else.`,
+            content: `Design a lean factory floor plan for:\n\n"${prompt}"\n\nBefore outputting, verify:\n- 12–16 nodes using row/slot positioning (no x/y)\n- At least 2 rows, main line on row 0\n- Sub-lines merge into main line (convergence edges)\n- Every node has 2–3 lean specs in notes\n- Distances between stations are compact (1–8m)\n- Return ONLY valid JSON.`,
           },
         ],
         stream: false,
-        temperature: 0.2,
+        temperature: 0.3,
         top_p: 0.9,
       }),
     });
@@ -241,7 +275,7 @@ app.post('/api/generate', async (req, res) => {
     layout.title = layout.title || 'Factory Floor Plan';
     layout.edges = layout.edges || [];
 
-    // Fix overlapping / stacked nodes deterministically
+    // Convert row/slot → x/y and fix any overlaps
     fixLayout(layout);
 
     console.log(`[generate] OK — ${layout.nodes.length} nodes, ${layout.edges.length} edges`);

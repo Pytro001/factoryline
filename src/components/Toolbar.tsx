@@ -34,14 +34,14 @@ export default function Toolbar({ title, onBack, onFitView, nodeCount, edgeCount
             gap: 6,
             background: 'none',
             border: 'none',
-            color: '#555',
+            color: '#888',
             cursor: 'pointer',
             fontSize: 13,
             fontFamily: 'inherit',
             padding: 0,
           }}
           onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#555')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#888')}
         >
           <ArrowLeft size={14} />
           <span>Back</span>
@@ -60,7 +60,7 @@ export default function Toolbar({ title, onBack, onFitView, nodeCount, edgeCount
           style={{
             fontSize: 13,
             fontWeight: 400,
-            color: '#888',
+            color: '#aaa',
             maxWidth: 380,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -74,11 +74,11 @@ export default function Toolbar({ title, onBack, onFitView, nodeCount, edgeCount
 
       {/* Right: counts + fit */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <span style={{ fontSize: 12, color: '#444' }}>
+        <span style={{ fontSize: 12, color: '#888' }}>
           {nodeCount} machines
         </span>
-        <span style={{ fontSize: 12, color: '#333' }}>·</span>
-        <span style={{ fontSize: 12, color: '#444' }}>
+        <span style={{ fontSize: 12, color: '#555' }}>·</span>
+        <span style={{ fontSize: 12, color: '#888' }}>
           {edgeCount} connections
         </span>
 

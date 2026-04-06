@@ -1,5 +1,19 @@
 import { ALL_MACHINE_TYPES, MACHINE_CATEGORIES, type MachineTypeId, type MachineCategory } from '@/lib/machineTypes'
-import { MachineSymbolThumb } from './MachineSymbols'
+
+const ACCENT: Record<string, string> = {
+  conveyor:   '#94A3B8',
+  cnc:        '#60A5FA',
+  robot:      '#A78BFA',
+  welding:    '#FB923C',
+  paint:      '#F472B6',
+  assembly:   '#4ADE80',
+  inspection: '#38BDF8',
+  storage:    '#8B9CB6',
+  loading:    '#FBBF24',
+  quality:    '#2DD4BF',
+  packaging:  '#818CF8',
+  exit:       '#F87171',
+}
 
 interface MachinePaletteProps {
   onAddMachine: (machineType: MachineTypeId) => void
@@ -30,100 +44,92 @@ export default function MachinePalette({ onAddMachine }: MachinePaletteProps) {
           flexShrink: 0,
         }}
       >
-        <div style={{ fontSize: 11, fontWeight: 500, color: '#fff', letterSpacing: '-0.01em' }}>
+        <div style={{ fontSize: 12, fontWeight: 500, color: '#fff', letterSpacing: '-0.01em' }}>
           Machinery
         </div>
-        <div style={{ fontSize: 11, color: '#444', marginTop: 2 }}>
+        <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>
           Click to add
         </div>
       </div>
 
       {/* List */}
-      <div style={{ flex: 1, overflowY: 'auto', paddingTop: 4 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '6px 10px' }}>
         {categories.map(([catId, category]) => {
           const machines = ALL_MACHINE_TYPES.filter((m) => m.category === catId)
           if (machines.length === 0) return null
 
           return (
-            <div key={catId} style={{ marginBottom: 8 }}>
+            <div key={catId} style={{ marginBottom: 6 }}>
               {/* Category label */}
               <div
                 style={{
-                  padding: '8px 14px 4px',
-                  fontSize: 10,
-                  fontWeight: 500,
-                  color: '#333',
+                  padding: '8px 4px 4px',
+                  fontSize: 9,
+                  fontWeight: 600,
+                  color: '#555',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.12em',
                 }}
               >
                 {category.name}
               </div>
 
-              {/* Machine items */}
-              {machines.map((machine) => (
-                <MachineRow
-                  key={machine.id}
-                  machine={machine}
-                  onClick={() => onAddMachine(machine.id)}
-                />
-              ))}
+              {/* Machine items — styled like generated nodes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {machines.map((machine) => {
+                  const accent = ACCENT[machine.id] ?? '#9CA3AF'
+                  return (
+                    <button
+                      key={machine.id}
+                      onClick={() => onAddMachine(machine.id)}
+                      title={machine.description}
+                      style={{
+                        width: '100%',
+                        background: '#0f0f0f',
+                        border: '1px solid #2a2a2a',
+                        borderRadius: 5,
+                        padding: '8px 10px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontFamily: 'Inter, system-ui, sans-serif',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 3,
+                        transition: 'border-color 0.1s',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = accent + '55')}
+                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#2a2a2a')}
+                    >
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 600,
+                          color: accent,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.12em',
+                          lineHeight: 1,
+                        }}
+                      >
+                        {machine.id}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 500,
+                          color: '#fff',
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {machine.name}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           )
         })}
       </div>
     </div>
-  )
-}
-
-function MachineRow({
-  machine,
-  onClick,
-}: {
-  machine: { id: string; name: string; description: string; defaultWidth: number; defaultHeight: number }
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      title={machine.description}
-      style={{
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        padding: '7px 14px',
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        textAlign: 'left',
-        fontFamily: 'Inter, system-ui, sans-serif',
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = '#0f0f0f')}
-      onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
-    >
-      {/* CAD symbol thumbnail */}
-      <div
-        style={{
-          flexShrink: 0,
-          width: 36,
-          height: 28,
-          background: '#fff',
-          border: '1px solid #333',
-          overflow: 'hidden',
-        }}
-      >
-        <MachineSymbolThumb type={machine.id} />
-      </div>
-
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 400, color: '#ccc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
-          {machine.name}
-        </div>
-        <div style={{ fontSize: 10, color: '#333', fontFamily: 'monospace', marginTop: 1 }}>
-          {machine.defaultWidth}×{machine.defaultHeight}
-        </div>
-      </div>
-    </button>
   )
 }
