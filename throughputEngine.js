@@ -2,7 +2,7 @@
  * Takt + bottleneck analysis for factory layouts (serial line heuristic).
  */
 
-const MAX_UNITS_PER_YEAR = 100_000_000
+const MAX_UNITS_PER_YEAR = 1_000_000_000
 
 const PROCESSING_TYPES = new Set([
   'assembly',

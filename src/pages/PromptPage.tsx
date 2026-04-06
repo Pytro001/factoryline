@@ -20,7 +20,9 @@ interface PromptPageProps {
 type Status = 'idle' | 'generating' | 'error'
 
 const ANNUAL_OUTPUT_LABEL_COLOR = '#999'
-const MAX_ANNUAL_OUTPUT = 100_000_000
+const MAX_ANNUAL_OUTPUT = 1_000_000_000
+/** ~fits "1,000,000,000" at 13px Inter + horizontal padding */
+const ANNUAL_OUTPUT_INPUT_WIDTH = 158
 
 function formatAnnualOutputInput(raw: string): string {
   const digits = raw.replace(/\D/g, '')
@@ -182,10 +184,12 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
               value={annualVolume}
               onChange={(e) => setAnnualVolume(formatAnnualOutputInput(e.target.value))}
               disabled={status === 'generating'}
-              placeholder="100,000"
+              placeholder="1,000,000,000"
               style={{
-                flex: '1 1 120px',
-                minWidth: 100,
+                flex: '0 0 auto',
+                width: ANNUAL_OUTPUT_INPUT_WIDTH,
+                maxWidth: '100%',
+                boxSizing: 'border-box',
                 background: '#0a0a0a',
                 border: '1px solid #222',
                 borderRadius: 4,
@@ -204,6 +208,7 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
                 alignItems: 'center',
                 gap: 8,
                 padding: '7px 18px',
+                marginLeft: 'auto',
                 background: canGenerate ? '#fff' : '#111',
                 color: canGenerate ? '#000' : '#444',
                 border: 'none',
