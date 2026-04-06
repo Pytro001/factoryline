@@ -125,7 +125,7 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
           </h1>
         </div>
 
-        {/* Prompt + annual output + Generate + Start from scratch — one card */}
+        {/* Prompt + annual output + Generate */}
         <div
           style={{
             border: `1px solid ${status === 'generating' ? '#444' : '#222'}`,
@@ -238,46 +238,45 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
               )}
             </button>
           </div>
+        </div>
 
-          <div
+        <div
+          style={{
+            marginTop: 12,
+            display: 'flex',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleStartFromScratch}
+            disabled={status === 'generating'}
             style={{
-              padding: '8px 16px 10px',
-              borderTop: '1px solid #111',
-              display: 'flex',
-              justifyContent: 'flex-start',
+              background: 'none',
+              border: '1px solid #2a2a2a',
+              borderRadius: 4,
+              color: '#999',
+              fontSize: 12,
+              fontWeight: 500,
+              fontFamily: 'Inter, system-ui, sans-serif',
+              padding: '8px 14px',
+              cursor: status === 'generating' ? 'not-allowed' : 'pointer',
+              transition: 'border-color 0.12s, color 0.12s, background 0.12s',
+            }}
+            onMouseEnter={(e) => {
+              if (status === 'generating') return
+              e.currentTarget.style.borderColor = '#444'
+              e.currentTarget.style.color = '#fff'
+              e.currentTarget.style.background = '#111'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#2a2a2a'
+              e.currentTarget.style.color = '#999'
+              e.currentTarget.style.background = 'none'
             }}
           >
-            <button
-              type="button"
-              onClick={handleStartFromScratch}
-              disabled={status === 'generating'}
-              style={{
-                background: 'none',
-                border: '1px solid #2a2a2a',
-                borderRadius: 4,
-                color: '#999',
-                fontSize: 12,
-                fontWeight: 500,
-                fontFamily: 'Inter, system-ui, sans-serif',
-                padding: '6px 12px',
-                cursor: status === 'generating' ? 'not-allowed' : 'pointer',
-                transition: 'border-color 0.12s, color 0.12s, background 0.12s',
-              }}
-              onMouseEnter={(e) => {
-                if (status === 'generating') return
-                e.currentTarget.style.borderColor = '#444'
-                e.currentTarget.style.color = '#fff'
-                e.currentTarget.style.background = '#111'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#2a2a2a'
-                e.currentTarget.style.color = '#999'
-                e.currentTarget.style.background = 'none'
-              }}
-            >
-              Start from scratch
-            </button>
-          </div>
+            Start from scratch
+          </button>
         </div>
 
         {/* Error */}
