@@ -82,10 +82,10 @@ export default function MachinePalette({ onAddMachine }: MachinePaletteProps) {
         }}
       >
         <div style={{ fontSize: 12, fontWeight: 500, color: '#fff', letterSpacing: '-0.01em' }}>
-          Machinery
+          Add stations
         </div>
         <div style={{ fontSize: 11, color: '#999', marginTop: 2 }}>
-          Click to add
+          Click to place on the board
         </div>
       </div>
 
@@ -113,9 +113,9 @@ export default function MachinePalette({ onAddMachine }: MachinePaletteProps) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search machines…"
+            placeholder="Search stations…"
             autoComplete="off"
-            aria-label="Search machines"
+            aria-label="Search stations"
             className="palette-search-input"
             style={{
               flex: 1,

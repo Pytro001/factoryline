@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react'
 import {
   createEmptyFactoryLayout,
   generateLayout,
@@ -7,11 +7,10 @@ import {
   type ProductionParams,
 } from '@/lib/api'
 
-
 const EXAMPLES = [
-  'Automotive assembly line',
-  'Semiconductor wafer fab',
-  'Electronics PCB factory',
+  'Aerospace subassembly line (pylon / structural kit)',
+  'Insourcing a supplier part onto the main line',
+  'Final assembly with lower station density (spacing)',
 ]
 
 interface PromptPageProps {
@@ -39,6 +38,7 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
   const [annualVolume, setAnnualVolume] = useState('')
+  const [aiDraftOpen, setAiDraftOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const parseProduction = (): ProductionParams | null => {
@@ -73,6 +73,14 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
 
   const canGenerate = prompt.trim().length > 5 && status !== 'generating'
 
+  const applyExample = (ex: string) => {
+    setPrompt(ex)
+    setError('')
+    setStatus('idle')
+    setAiDraftOpen(true)
+    setTimeout(() => textareaRef.current?.focus(), 0)
+  }
+
   return (
     <div className="relative z-[1] h-full flex flex-col" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Fixed dot layer — always visible behind content */}
@@ -99,13 +107,12 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
         className="flex-1 flex flex-col"
         style={{ maxWidth: 720, margin: '0 auto', width: '100%', padding: '60px 32px 80px' }}
       >
-        {/* Hero — flex centers the text block as a whole; lines stay aligned to each other */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'center',
             width: '100%',
-            marginBottom: 48,
+            marginBottom: 20,
           }}
         >
           <h1
@@ -120,131 +127,30 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
               maxWidth: '100%',
             }}
           >
-            <span style={{ display: 'block', whiteSpace: 'nowrap' }}>Optimize your factory</span>
-            <span style={{ display: 'block', marginTop: '0.06em' }}>with one prompt.</span>
+            <span style={{ display: 'block' }}>Lean line planning,</span>
+            <span style={{ display: 'block', marginTop: '0.06em' }}>from the first layout.</span>
           </h1>
         </div>
 
-        {/* Prompt + annual output + Generate */}
-        <div
+        <p
           style={{
-            border: `1px solid ${status === 'generating' ? '#444' : '#222'}`,
-            borderRadius: 6,
-            background: '#000',
-            overflow: 'hidden',
-            transition: 'border-color 0.15s',
+            fontSize: 13,
+            color: '#555',
+            lineHeight: 1.5,
+            margin: '0 0 36px',
+            maxWidth: 520,
           }}
         >
-          <textarea
-            ref={textareaRef}
-            className="placeholder:text-white/60 placeholder:font-normal"
-            value={prompt}
-            onChange={(e) => {
-              setPrompt(e.target.value)
-              if (status === 'error') setStatus('idle')
-            }}
-            onKeyDown={handleKeyDown}
-            disabled={status === 'generating'}
-            rows={4}
-            placeholder="Describe your factory line..."
-            style={{
-              width: '100%',
-              background: 'transparent',
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 400,
-              fontFamily: 'Inter, system-ui, sans-serif',
-              lineHeight: 1.6,
-              padding: '16px 18px 12px',
-              border: 'none',
-              outline: 'none',
-              resize: 'none',
-              display: 'block',
-              boxSizing: 'border-box',
-            }}
-          />
+          Experiment with material flow and scenarios in hours—not weeks of sticky-note redraws. Build from scratch or
+          generate an AI draft to iterate on.
+        </p>
 
-          <div
-            style={{
-              padding: '10px 16px',
-              borderTop: '1px solid #111',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-            }}
-          >
-            <label
-              style={{
-                fontSize: 11,
-                color: ANNUAL_OUTPUT_LABEL_COLOR,
-                textTransform: 'uppercase',
-                letterSpacing: '0.07em',
-                flexShrink: 0,
-              }}
-            >
-              Annual output
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              className="annual-output-input"
-              value={annualVolume}
-              onChange={(e) => setAnnualVolume(formatAnnualOutputInput(e.target.value))}
-              disabled={status === 'generating'}
-              placeholder="1,000,000,000"
-              style={{
-                flex: '0 0 auto',
-                width: ANNUAL_OUTPUT_INPUT_WIDTH,
-                maxWidth: '100%',
-                boxSizing: 'border-box',
-                background: '#0a0a0a',
-                border: '1px solid #222',
-                borderRadius: 4,
-                color: ANNUAL_OUTPUT_LABEL_COLOR,
-                fontSize: 13,
-                padding: '7px 10px',
-                outline: 'none',
-                fontFamily: 'Inter, system-ui, sans-serif',
-              }}
-            />
-            <button
-              onClick={handleGenerate}
-              disabled={!canGenerate}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '7px 18px',
-                marginLeft: 'auto',
-                background: canGenerate ? '#fff' : '#111',
-                color: canGenerate ? '#000' : '#444',
-                border: 'none',
-                borderRadius: 4,
-                fontSize: 13,
-                fontWeight: 500,
-                fontFamily: 'Inter, system-ui, sans-serif',
-                cursor: canGenerate ? 'pointer' : 'not-allowed',
-                transition: 'background 0.15s, color 0.15s',
-                flexShrink: 0,
-              }}
-            >
-              {status === 'generating' ? (
-                <>
-                  <Loader2 size={13} className="animate-spin" />
-                  Generating
-                </>
-              ) : (
-                'Generate'
-              )}
-            </button>
-          </div>
-        </div>
-
+        {/* Primary: blank board */}
         <div
           style={{
-            marginTop: 12,
             display: 'flex',
             justifyContent: 'flex-start',
+            marginBottom: 20,
           }}
         >
           <button
@@ -275,6 +181,148 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
           </button>
         </div>
 
+        {/* Optional AI draft — collapsed by default */}
+        <button
+          type="button"
+          onClick={() => setAiDraftOpen((v) => !v)}
+          disabled={status === 'generating'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            background: 'none',
+            border: 'none',
+            padding: '4px 0 12px',
+            cursor: status === 'generating' ? 'not-allowed' : 'pointer',
+            color: '#999',
+            fontSize: 12,
+            fontWeight: 500,
+            fontFamily: 'Inter, system-ui, sans-serif',
+            textAlign: 'left',
+          }}
+          aria-expanded={aiDraftOpen}
+        >
+          {aiDraftOpen ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}
+          Generate a draft layout (optional)
+        </button>
+
+        {aiDraftOpen && (
+          <div
+            style={{
+              border: `1px solid ${status === 'generating' ? '#444' : '#222'}`,
+              borderRadius: 6,
+              background: '#000',
+              overflow: 'hidden',
+              transition: 'border-color 0.15s',
+              marginBottom: 8,
+            }}
+          >
+            <textarea
+              ref={textareaRef}
+              className="placeholder:text-white/60 placeholder:font-normal"
+              value={prompt}
+              onChange={(e) => {
+                setPrompt(e.target.value)
+                if (status === 'error') setStatus('idle')
+              }}
+              onKeyDown={handleKeyDown}
+              disabled={status === 'generating'}
+              rows={4}
+              placeholder="Describe a planning scenario…"
+              style={{
+                width: '100%',
+                background: 'transparent',
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 400,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                lineHeight: 1.6,
+                padding: '16px 18px 12px',
+                border: 'none',
+                outline: 'none',
+                resize: 'none',
+                display: 'block',
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <div
+              style={{
+                padding: '10px 16px',
+                borderTop: '1px solid #111',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+              }}
+            >
+              <label
+                style={{
+                  fontSize: 11,
+                  color: ANNUAL_OUTPUT_LABEL_COLOR,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.07em',
+                  flexShrink: 0,
+                }}
+              >
+                Annual output
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                className="annual-output-input"
+                value={annualVolume}
+                onChange={(e) => setAnnualVolume(formatAnnualOutputInput(e.target.value))}
+                disabled={status === 'generating'}
+                placeholder="1,000,000,000"
+                style={{
+                  flex: '0 0 auto',
+                  width: ANNUAL_OUTPUT_INPUT_WIDTH,
+                  maxWidth: '100%',
+                  boxSizing: 'border-box',
+                  background: '#0a0a0a',
+                  border: '1px solid #222',
+                  borderRadius: 4,
+                  color: ANNUAL_OUTPUT_LABEL_COLOR,
+                  fontSize: 13,
+                  padding: '7px 10px',
+                  outline: 'none',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}
+              />
+              <button
+                onClick={handleGenerate}
+                disabled={!canGenerate}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '7px 18px',
+                  marginLeft: 'auto',
+                  background: canGenerate ? '#fff' : '#111',
+                  color: canGenerate ? '#000' : '#444',
+                  border: 'none',
+                  borderRadius: 4,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  cursor: canGenerate ? 'pointer' : 'not-allowed',
+                  transition: 'background 0.15s, color 0.15s',
+                  flexShrink: 0,
+                }}
+              >
+                {status === 'generating' ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" />
+                    Generating
+                  </>
+                ) : (
+                  'Generate draft'
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Error */}
         {status === 'error' && (
           <div
@@ -304,18 +352,13 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
         {/* Examples */}
         <div style={{ marginTop: 36 }}>
           <p style={{ fontSize: 12, color: '#333', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            Examples
+            Scenario ideas
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {EXAMPLES.map((ex) => (
               <button
                 key={ex}
-                onClick={() => {
-                  setPrompt(ex)
-                  setError('')
-                  setStatus('idle')
-                  textareaRef.current?.focus()
-                }}
+                onClick={() => applyExample(ex)}
                 style={{
                   background: 'none',
                   border: 'none',

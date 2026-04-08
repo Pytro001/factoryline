@@ -1,7 +1,7 @@
 /**
  * Layout generation — Vercel + local. Uses hosted OpenAI-compatible API, Ollama, or built-in demo.
  */
-import { FACTORY_SYSTEM_PROMPT, USER_SUFFIX } from './factoryKnowledge.js';
+import { FACTORY_SYSTEM_PROMPT, USER_SUFFIX, PLANNING_USER_PREFIX } from './factoryKnowledge.js';
 import { buildDemoLayout } from './demoLayout.js';
 import { normalizeProductionInput, formatTaktSnippet, applyThroughputAnalysis } from './throughputEngine.js';
 
@@ -261,9 +261,10 @@ export async function generateLayoutFromPrompt(prompt, productionRaw = null) {
   }
 
   const production = normalizeProductionInput(productionRaw);
+  const scenarioBlock = `Draft scenario for iteration:\n\n"${prompt}"\n\n`;
   const userContent = production
-    ? `Design a lean factory floor plan for:\n\n"${prompt}"\n\n${formatTaktSnippet(production)}\n\n${USER_SUFFIX}`
-    : `Design a lean factory floor plan for:\n\n"${prompt}"\n\n${USER_SUFFIX}`;
+    ? `${PLANNING_USER_PREFIX}${scenarioBlock}${formatTaktSnippet(production)}\n\n${USER_SUFFIX}`
+    : `${PLANNING_USER_PREFIX}${scenarioBlock}${USER_SUFFIX}`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 120_000);

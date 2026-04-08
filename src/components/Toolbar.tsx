@@ -75,7 +75,7 @@ export default function Toolbar({ title, onBack, onFitView, nodeCount, edgeCount
       {/* Right: counts + fit */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <span style={{ fontSize: 12, color: '#888' }}>
-          {nodeCount} machines
+          {nodeCount} stations
         </span>
         <span style={{ fontSize: 12, color: '#555' }}>·</span>
         <span style={{ fontSize: 12, color: '#888' }}>

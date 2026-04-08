@@ -60,7 +60,7 @@ export interface FactoryLayout {
 /** Empty canvas for “start from scratch” — add machines from the palette. */
 export function createEmptyFactoryLayout(): FactoryLayout {
   return {
-    title: 'Untitled factory',
+    title: 'New line plan',
     nodes: [],
     edges: [],
   }
