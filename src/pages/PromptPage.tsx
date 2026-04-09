@@ -13,6 +13,8 @@ const EXAMPLES = [
   'Final assembly with lower station density (spacing)',
 ]
 
+const BOOK_SHELF = [{ title: 'Explore/Create', author: 'Richard Garriott' }]
+
 interface PromptPageProps {
   onGenerated: (layout: FactoryLayout) => void
 }
@@ -379,6 +381,41 @@ export default function PromptPage({ onGenerated }: PromptPageProps) {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Book shelf */}
+        <div style={{ marginTop: 36 }}>
+          <p
+            style={{
+              fontSize: 12,
+              color: '#333',
+              marginBottom: 12,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+            }}
+          >
+            Book shelf
+          </p>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+            {BOOK_SHELF.map((book) => (
+              <li
+                key={`${book.title}-${book.author}`}
+                style={{
+                  padding: '6px 0',
+                  fontSize: 14,
+                  fontWeight: 300,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  color: '#555',
+                  letterSpacing: '-0.01em',
+                  lineHeight: 1.45,
+                }}
+              >
+                <span style={{ color: '#888' }}>{book.title}</span>
+                <span style={{ color: '#333' }}> · </span>
+                <span>{book.author}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </main>
       </div>
